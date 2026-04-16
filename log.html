@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Logger</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 16px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .event-btn {
+      min-height: 70px;
+      font-weight: bold;
+    }
+
+    .log {
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    .log-entry {
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+
+    .status {
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Event Logger</h1>
+
+  <div class="topbar">
+    <button onclick="startSession()">Start test</button>
+    <button onclick="resetSession()">Reset</button>
+    <button onclick="downloadCSV()">Download CSV</button>
+  </div>
+
+  <div class="status" id="status">Nog niet gestart</div>
+
+  <div class="grid">
+    <button class="event-btn" onclick="logEvent('ST')">ST</button>
+    <button class="event-btn" onclick="logEvent('VR')">VR</button>
+    <button class="event-btn" onclick="logEvent('RK')">RK</button>
+    <button class="event-btn" onclick="logEvent('I1')">I1</button>
+    <button class="event-btn" onclick="logEvent('I2')">I2</button>
+    <button class="event-btn" onclick="logEvent('I3')">I3</button>
+    <button class="event-btn" onclick="logEvent('Q1')">Q1</button>
+    <button class="event-btn" onclick="logEvent('A+')">A+</button>
+    <button class="event-btn" onclick="logEvent('A-')">A-</button>
+  </div>
+
+  <div class="log" id="log"></div>
+
+  <script>
+    let startTime = null;
+    let events = [];
+
+    function startSession() {
+      startTime = Date.now();
+      events = [];
+      document.getElementById("log").innerHTML = "";
+      document.getElementById("status").textContent = "Test gestart";
+    }
+
+    function resetSession() {
+      startTime = null;
+      events = [];
+      document.getElementById("log").innerHTML = "";
+      document.getElementById("status").textContent = "Nog niet gestart";
+    }
+
+    function formatElapsed(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function logEvent(code) {
+      if (!startTime) {
+        alert("Start eerst de test.");
+        return;
+      }
+
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const timestamp = formatElapsed(elapsed);
+
+      const eventData = {
+        code: code,
+        elapsedMs: elapsed,
+        timestamp: timestamp
+      };
+
+      events.push(eventData);
+
+      const logDiv = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.textContent = `${timestamp} – ${code}`;
+      logDiv.prepend(entry);
+    }
+
+    function downloadCSV() {
+      if (events.length === 0) {
+        alert("Nog geen events gelogd.");
+        return;
+      }
+
+      let csv = "index,code,timestamp,elapsed_ms\n";
+      events.forEach((e, i) => {
+        csv += `${i + 1},${e.code},${e.timestamp},${e.elapsedMs}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "event_log.csv";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

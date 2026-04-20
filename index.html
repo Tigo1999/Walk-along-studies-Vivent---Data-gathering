@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-<title>Behavior Logger</title>
+<title>Behavior Logger V3</title>
 
 <style>
 :root{
@@ -40,6 +40,7 @@ body{padding:12px;}
   border:none;border-radius:16px;background:var(--top);
   font-size:13px;font-weight:700;height:50px;
   box-shadow:var(--shadow);
+  color:var(--text);
 }
 
 .status-card{
@@ -57,8 +58,8 @@ body{padding:12px;}
   grid-template-areas:
     "g1 g2 y1"
     "o1 o2 y2"
-    "o3 o4 y2"
-    "b1 b2 b3";
+    "o3 o4 b1"
+    "b2 b3 b4";
 }
 
 .event-btn{
@@ -68,10 +69,11 @@ body{padding:12px;}
   align-items:center;justify-content:center;
   text-align:center;padding:6px;
   box-shadow:var(--shadow);
+  color:var(--text);
 }
 
-.code{font-size:20px;font-weight:800;}
-.desc{font-size:9px;}
+.code{font-size:20px;font-weight:800;line-height:1;}
+.desc{font-size:9px;line-height:1.1;margin-top:3px;}
 
 .green{background:var(--green);border-color:var(--green-b);}
 .yellow{background:var(--yellow);border-color:var(--yellow-b);}
@@ -82,7 +84,7 @@ body{padding:12px;}
 .y1{grid-area:y1;} .y2{grid-area:y2;}
 .o1{grid-area:o1;} .o2{grid-area:o2;}
 .o3{grid-area:o3;} .o4{grid-area:o4;}
-.b1{grid-area:b1;} .b2{grid-area:b2;} .b3{grid-area:b3;}
+.b1{grid-area:b1;} .b2{grid-area:b2;} .b3{grid-area:b3;} .b4{grid-area:b4;}
 
 .log-panel{
   background:var(--card);
@@ -90,148 +92,247 @@ body{padding:12px;}
   box-shadow:var(--shadow);
   display:grid;
   grid-template-rows:auto 1fr;
+  overflow:hidden;
 }
 
-.log-header{font-size:12px;font-weight:700;padding:8px;border-bottom:1px solid #eee;}
-.log-list{overflow:auto;padding:8px;font-size:11px;}
-.log-entry{padding:4px 0;border-bottom:1px solid #eee;}
+.log-header{
+  font-size:12px;
+  font-weight:700;
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
 
+.log-list{
+  overflow:auto;
+  padding:8px;
+  font-size:11px;
+}
+
+.log-entry{
+  padding:4px 0;
+  border-bottom:1px solid #eee;
+}
+
+.log-entry:last-child{
+  border-bottom:none;
+}
 </style>
 </head>
 
 <body>
 <div class="app">
 
-<div class="controls">
-<button class="control-btn" onclick="start()">Start</button>
-<button class="control-btn" onclick="pause()">Pause</button>
-<button class="control-btn" onclick="reset()">Reset</button>
-<button class="control-btn" onclick="note()">Note</button>
-<button class="control-btn" onclick="download()">Download</button>
-<button class="control-btn" onclick="undo()">Undo</button>
-</div>
+  <div class="controls">
+    <button class="control-btn" onclick="confirmStart()">Start</button>
+    <button class="control-btn" onclick="confirmPause()">Pause</button>
+    <button class="control-btn" onclick="confirmReset()">Reset</button>
+    <button class="control-btn" onclick="note()">Note</button>
+    <button class="control-btn" onclick="download()">Download</button>
+    <button class="control-btn" onclick="undo()">Undo</button>
+  </div>
 
-<div class="status-card">
-<div class="status-title" id="status">Not started</div>
-<div class="status-time">Time: <span id="time">00:00:00</span></div>
-</div>
+  <div class="status-card">
+    <div class="status-title" id="status">Not started</div>
+    <div class="status-time">Time: <span id="time">00:00:00</span></div>
+  </div>
 
-<div class="behavior-grid">
+  <div class="behavior-grid">
 
-<!-- GREEN -->
-<button class="event-btn green g1" onclick="log('SL','slowing down')">
-<div class="code">SL</div><div class="desc">slowing</div>
-</button>
+    <!-- GREEN -->
+    <button class="event-btn green g1" onclick="log('SL','Slowing down')">
+      <div class="code">SL</div><div class="desc">Slowing down</div>
+    </button>
 
-<button class="event-btn green g2" onclick="log('SS','short scanning')">
-<div class="code">SS</div><div class="desc">scan</div>
-</button>
+    <button class="event-btn green g2" onclick="log('SS','Short scanning')">
+      <div class="code">SS</div><div class="desc">Short scanning</div>
+    </button>
 
-<!-- YELLOW -->
-<button class="event-btn yellow y1" onclick="log('ST','stop')">
-<div class="code">ST</div><div class="desc">stop</div>
-</button>
+    <!-- YELLOW -->
+    <button class="event-btn yellow y1" onclick="log('RS','Repeated scanning')">
+      <div class="code">RS</div><div class="desc">Repeated scanning</div>
+    </button>
 
-<button class="event-btn yellow y2" onclick="log('RS','repeat scan')">
-<div class="code">RS</div><div class="desc">repeat</div>
-</button>
+    <button class="event-btn yellow y2" onclick="log('ST','Stop')">
+      <div class="code">ST</div><div class="desc">Stop</div>
+    </button>
 
-<!-- ORANGE -->
-<button class="event-btn orange o1" onclick="log('WD','wrong direction')">
-<div class="code">WD</div><div class="desc">wrong dir</div>
-</button>
+    <!-- ORANGE -->
+    <button class="event-btn orange o1" onclick="log('WD','Wrong direction')">
+      <div class="code">WD</div><div class="desc">Wrong direction</div>
+    </button>
 
-<button class="event-btn orange o2" onclick="log('RT','returning')">
-<div class="code">RT</div><div class="desc">return</div>
-</button>
+    <button class="event-btn orange o2" onclick="log('RC','Route Correction')">
+      <div class="code">RC</div><div class="desc">Route correction</div>
+    </button>
 
-<button class="event-btn orange o3" onclick="log('FP','faster pace')">
-<div class="code">FP</div><div class="desc">faster</div>
-</button>
+    <button class="event-btn orange o3" onclick="log('AC','Acceleration')">
+      <div class="code">AC</div><div class="desc">Acceleration</div>
+    </button>
 
-<button class="event-btn orange o4" onclick="log('RS2','reorienting')">
-<div class="code">RO</div><div class="desc">reorient</div>
-</button>
+    <!-- BLUE -->
+    <button class="event-btn blue o4" onclick="log('CS','Compass shifting')">
+      <div class="code">CS</div><div class="desc">Compass shifting</div>
+    </button>
 
-<!-- BLUE -->
-<button class="event-btn blue b1" onclick="log('DC','decision')">
-<div class="code">DC</div><div class="desc">decision</div>
-</button>
+    <button class="event-btn blue b1" onclick="log('DC','Decision')">
+      <div class="code">DC</div><div class="desc">Decision</div>
+    </button>
 
-<button class="event-btn blue b2" onclick="log('NR','no reaction')">
-<div class="code">NR</div><div class="desc">no react</div>
-</button>
+    <button class="event-btn blue b2" onclick="log('NR','No reaction')">
+      <div class="code">NR</div><div class="desc">No reaction</div>
+    </button>
 
-<button class="event-btn blue b3" onclick="log('CR','correct response')">
-<div class="code">CR</div><div class="desc">correct</div>
-</button>
+    <button class="event-btn blue b3" onclick="log('CR','Rorrect response')">
+      <div class="code">CR</div><div class="desc">Correct response</div>
+    </button>
 
-</div>
+    <button class="event-btn blue b4" onclick="log('IV','Intervention')">
+      <div class="code">IV</div><div class="desc">Intervention</div>
+    </button>
 
-<div class="log-panel">
-<div class="log-header">Log</div>
-<div class="log-list" id="log"></div>
-</div>
+  </div>
+
+  <div class="log-panel">
+    <div class="log-header">Log</div>
+    <div class="log-list" id="log"></div>
+  </div>
 
 </div>
 
 <script>
-let logs=[];let startTime=0;let running=false;
+let logs = [];
+let startTime = 0;
+let running = false;
+let pausedElapsed = 0;
+let timerInterval = null;
 
 function format(t){
-let s=Math.floor(t/1000);
-let h=String(Math.floor(s/3600)).padStart(2,'0');
-let m=String(Math.floor((s%3600)/60)).padStart(2,'0');
-let sec=String(s%60).padStart(2,'0');
-return `${h}:${m}:${sec}`;
+  let s = Math.floor(t / 1000);
+  let h = String(Math.floor(s / 3600)).padStart(2,'0');
+  let m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+  let sec = String(s % 60).padStart(2,'0');
+  return `${h}:${m}:${sec}`;
 }
 
-function start(){startTime=Date.now();running=true;logs=[];update();}
-function pause(){running=!running;}
-function reset(){running=false;logs=[];update();}
-function undo(){logs.pop();render();}
-function note(){let t=prompt("note");if(t)log("NOTE",t);}
+function getElapsed(){
+  if (!startTime) return 0;
+  return running ? (Date.now() - startTime) : pausedElapsed;
+}
 
-function log(code,label){
-if(!running)return;
-let t=Date.now()-startTime;
-logs.push({t,code,label});
-render();
+function ensureTimer(){
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    document.getElementById("time").innerText = format(getElapsed());
+
+    if (startTime === 0) {
+      document.getElementById("status").innerText = "Not started";
+    } else if (running) {
+      document.getElementById("status").innerText = "Running";
+    } else {
+      document.getElementById("status").innerText = "Paused";
+    }
+  }, 200);
+}
+
+function start(){
+  startTime = Date.now();
+  pausedElapsed = 0;
+  running = true;
+  logs = [];
+  render();
+  ensureTimer();
+}
+
+function pause(){
+  if (startTime === 0) return;
+
+  if (running) {
+    pausedElapsed = Date.now() - startTime;
+    running = false;
+  } else {
+    startTime = Date.now() - pausedElapsed;
+    running = true;
+  }
+}
+
+function reset(){
+  running = false;
+  startTime = 0;
+  pausedElapsed = 0;
+  logs = [];
+  render();
+  document.getElementById("time").innerText = "00:00:00";
+  document.getElementById("status").innerText = "Not started";
+}
+
+function undo(){
+  logs.pop();
+  render();
+}
+
+function note(){
+  let t = prompt("Note");
+  if (t) log("NOTE", t);
+}
+
+function log(code, label){
+  if (!running) return;
+  let t = getElapsed();
+  logs.push({ t, code, label });
+  render();
 }
 
 function render(){
-let el=document.getElementById("log");
-el.innerHTML="";
-logs.slice().reverse().forEach(l=>{
-let d=document.createElement("div");
-d.className="log-entry";
-d.innerHTML=`${format(l.t)} - ${l.code} ${l.label}`;
-el.appendChild(d);
-});
-}
-
-function update(){
-setInterval(()=>{
-if(running){
-document.getElementById("time").innerText=format(Date.now()-startTime);
-document.getElementById("status").innerText="Running";
-}else{
-document.getElementById("status").innerText="Paused / Not started";
-}
-},200);
+  let el = document.getElementById("log");
+  el.innerHTML = "";
+  logs.slice().reverse().forEach(l => {
+    let d = document.createElement("div");
+    d.className = "log-entry";
+    d.innerHTML = `${format(l.t)} - ${l.code} ${l.label}`;
+    el.appendChild(d);
+  });
 }
 
 function download(){
-let csv="time,code,label\n";
-logs.forEach(l=>{
-csv+=`${format(l.t)},${l.code},${l.label}\n`;
-});
-let blob=new Blob([csv]);
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="log.csv";
-a.click();
+  let csv = "time,code,label\n";
+  logs.forEach(l => {
+    const safeLabel = String(l.label).replace(/"/g, '""');
+    csv += `${format(l.t)},${l.code},"${safeLabel}"\n`;
+  });
+  let blob = new Blob([csv], { type: "text/csv" });
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "log.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
+
+function confirmStart(){
+  const ok = confirm("Start a new session? This will clear the current log.");
+  if (ok) start();
+}
+
+function confirmPause(){
+  if (startTime === 0) {
+    alert("Start a session first.");
+    return;
+  }
+
+  const message = running
+    ? "Pause the current session?"
+    : "Resume the current session?";
+
+  const ok = confirm(message);
+  if (ok) pause();
+}
+
+function confirmReset(){
+  const ok = confirm("Reset the session and clear all logs?");
+  if (ok) reset();
+}
+
+ensureTimer();
+render();
 </script>
 
 </body>
